@@ -1384,6 +1384,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             float: Reward for the task
         """
         reward = 0
+        if self._check_success():
+            reward = 1.0
         return reward
 
     def _check_success(self):
