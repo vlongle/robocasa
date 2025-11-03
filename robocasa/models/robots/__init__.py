@@ -1,5 +1,6 @@
 import mujoco
 import numpy as np
+from enum import Enum
 
 from robosuite.controllers.parts.generic.joint_pos import JointPositionController
 from robosuite.controllers.parts.arm.osc import OperationalSpaceController
@@ -13,6 +14,18 @@ from robosuite.models.grippers import (
     FourierRightHand,
 )
 
+class RotationType(Enum):
+    """Type of rotation representation"""
+    AXIS_ANGLE = "axis_angle"
+    QUATERNION = "quaternion"
+    ROTATION_6D = "rotation_6d"
+    MATRIX = "matrix"
+    EULER_ANGLES_RPY = "euler_angles_rpy"
+    EULER_ANGLES_RYP = "euler_angles_ryp"
+    EULER_ANGLES_PRY = "euler_angles_pry"
+    EULER_ANGLES_PYR = "euler_angles_pyr"
+    EULER_ANGLES_YRP = "euler_angles_yrp"
+    EULER_ANGLES_YPR = "euler_angles_ypr"
 
 # This function returns in the order of the gripper XML's joints.
 def unformat_gripper_space(gripper, formatted_action):
@@ -132,13 +145,7 @@ def gather_robot_observations(env, verbose=False):
     return observations
 
 
-try:
-    from groot.data.schema.raw.metadata import RotationType
-except:
-    try:
-        from groot.vla.data.schema.raw.metadata import RotationType
-    except:
-        from groot.vla.data.schema import RotationType
+
 from gymnasium import spaces
 
 
