@@ -243,6 +243,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         translucent_robot=False,
         randomize_cameras=False,
     ):
+        print("[DEBUG] use_distractors: ", use_distractors)
         self.init_robot_base_pos = init_robot_base_pos
 
         # object placement initializer
@@ -336,6 +337,12 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         """
         Loads an xml model, puts it in self.model
         """
+        if not hasattr(self, "_load_attempts"):
+            self._load_attempts = 0
+        self._load_attempts += 1
+        if self._load_attempts > 1:
+            print(f"[DEBUG] _load_model attempt {self._load_attempts}...")
+
         super()._load_model()
 
         for robot in self.robots:
@@ -357,8 +364,11 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             self.style_id = self._ep_meta["style_id"]
         else:
             layout_id, style_id = self.rng.choice(self.layout_and_style_ids)
-            self.layout_id = int(layout_id)
-            self.style_id = int(style_id)
+            ## NOTE: IMPORTANT: vlongle/ hardcode the layout and style id to 4 for now
+            # self.layout_id = 4 # int(layout_id)
+            # self.style_id = 4 # int(style_id)
+            self.layout_id = 1
+            self.style_id = 1
 
         if macros.VERBOSE:
             print("layout: {}, style: {}".format(self.layout_id, self.style_id))
@@ -465,7 +475,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         # setup object locations
         self.placement_initializer = self._get_placement_initializer(self.object_cfgs)
         object_placements = None
-        for i in range(1):
+        for i in range(5): # Increase internal retries
             try:
                 object_placements = self.placement_initializer.sample(
                     placed_objects=self.fxtr_placements
@@ -475,11 +485,18 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     print("Randomization error in initial placement. Try #{}".format(i))
                 continue
             break
+            
         if object_placements is None:
-            if macros.VERBOSE:
-                print("Could not place objects. Trying again with self._load_model()")
+            if self._load_attempts > 10:
+                raise RuntimeError("Failed to place objects after 10 full environment reload attempts. Check your fixture sizes and offsets.")
+            
+            if macros.VERBOSE or True:
+                print(f"[DEBUG] Could not place objects on attempt {self._load_attempts}. Retrying _load_model()...")
             self._load_model()
             return
+        
+        if self._load_attempts > 1:
+            print(f"[DEBUG] Objects successfully placed on attempt {self._load_attempts}")
         self.object_placements = object_placements
 
     def _create_objects(self):
@@ -712,6 +729,9 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             placement = cfg.get("placement", None)
             if placement is None:
                 continue
+            
+            print(f"[DEBUG] Initializing sampler for: {cfg['name']} (Type: {cfg['type']})")
+            
             fixture_id = placement.get("fixture", None)
             if fixture_id is not None:
                 # get fixture to place object on
@@ -719,6 +739,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     id=fixture_id,
                     ref=placement.get("ref", None),
                 )
+                print(f"[DEBUG]   Target fixture: {fixture.name} at {fixture.pos}")
 
                 # calculate the total available space where object could be placed
                 sample_region_kwargs = placement.get("sample_region_kwargs", {})
@@ -728,6 +749,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 outer_size = reset_region["size"]
                 margin = placement.get("margin", 0.04)
                 outer_size = (outer_size[0] - margin, outer_size[1] - margin)
+                
+                print(f"[DEBUG]   Outer Region Size: {outer_size}, Offset: {reset_region['offset']}")
 
                 # calculate the size of the inner region where object will actually be placed
                 target_size = placement.get("size", None)
@@ -746,6 +769,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
 
                 inner_xpos, inner_ypos = placement.get("pos", (None, None))
                 offset = placement.get("offset", (0.0, 0.0))
+                
+                print(f"[DEBUG]   Inner Size: {inner_size}, Request Pos: {inner_xpos}, Request Offset: {offset}")
 
                 # center inner region within outer region
                 if inner_xpos == "ref":
@@ -762,6 +787,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                         outer_to_ref = fixture_to_ref - reset_region["offset"]
                         inner_xpos = outer_to_ref[0] / x_halfsize
                         inner_xpos = np.clip(inner_xpos, a_min=-1.0, a_max=1.0)
+                        print(f"[DEBUG]   Computed inner_xpos relative to ref {ref_fixture.name}: {inner_xpos}")
                 elif inner_xpos is None:
                     inner_xpos = 0.0
 
@@ -788,6 +814,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     + reset_region["offset"][1]
                     + intra_offset[1]
                 )
+                
+                print(f"[DEBUG]   Final X Range: {x_range}, Y Range: {y_range}")
                 rotation = placement.get("rotation", np.array([-np.pi / 4, np.pi / 4]))
             else:
                 target_size = placement.get("size", None)
@@ -796,6 +824,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 rotation = placement.get("rotation", np.array([-np.pi / 4, np.pi / 4]))
                 ref_pos = [0, 0, 0]
                 ref_rot = 0.0
+                print(f"[DEBUG]   Placing relative to WORLD origin. X Range: {x_range}, Y Range: {y_range}")
 
             if macros.SHOW_SITES is True:
                 """

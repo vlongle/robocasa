@@ -18,6 +18,11 @@ ALLOWED_LANGUAGE_CHARSET = (
 FINAL_IMAGE_RESOLUTION = (256, 256)
 
 
+def linearize_depth(depth_buffer, z_near, z_far):
+    # depth_buffer is in [0, 1]
+    # For standard OpenGL perspective projection:
+    return z_near / (1.0 - depth_buffer * (1.0 - z_near / z_far))
+
 class GrootRoboCasaEnv(RoboCasaEnv):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,15 +43,29 @@ class GrootRoboCasaEnv(RoboCasaEnv):
                 ] = spaces.Box(
                     low=0, high=255, shape=(*FINAL_IMAGE_RESOLUTION, 3), dtype=np.uint8
                 )
-            if mapped_name in ["video.res256_image_side_0", "video.res256_image_side_1", "video.res256_image_wrist_0"]:
+            if mapped_name in ["video.res256_image_side_0", "video.res256_image_side_1", "video.res256_image_wrist_0", "video.res256_image_front_0"]:
                 self.observation_space[
                     mapped_name.replace("256", "512")
                 ] = spaces.Box(
                     low=0, high=255, shape=(512, 512, 3), dtype=np.uint8
                 )
+                self.observation_space[
+                    mapped_name.replace("256", "512").replace("image", "depth")
+                ] = spaces.Box(
+                    low=0, high=1e10, shape=(512, 512, 1), dtype=np.float32
+                )
+            
         self.observation_space[
             "annotation.human.action.task_description"
         ] = spaces.Text(max_length=256, charset=ALLOWED_LANGUAGE_CHARSET)
+        
+        # Add ground truth object positions if available
+        self.observation_space["state.obj_pos"] = spaces.Box(
+            low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
+        )
+        self.observation_space["state.obj2_pos"] = spaces.Box(
+            low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
+        )
         self.action_space = self.key_converter.deduce_action_space(self.env)
 
         self.verbose = False
@@ -109,11 +128,26 @@ class GrootRoboCasaEnv(RoboCasaEnv):
                 ] = GrootRoboCasaEnv.process_img_cotrain(
                     raw_obs[camera_name + "_image"]
                 )
-            if mapped_name in ["video.res256_image_side_0", "video.res256_image_side_1", "video.res256_image_wrist_0"]:
+            if mapped_name in ["video.res256_image_side_0", "video.res256_image_side_1", "video.res256_image_wrist_0", "video.res256_image_front_0"]:
                 obs[
                     mapped_name.replace("256", "512")
                 ] = np.copy(raw_obs[camera_name + "_image"])
+                if (camera_name + "_depth") in raw_obs:
+                    obs[mapped_name.replace("256", "512").replace("image", "depth")] = np.copy(
+                        linearize_depth(raw_obs[camera_name + "_depth"],
+                                        self.env.sim.model.vis.map.znear * self.env.sim.model.stat.extent,
+                                        self.env.sim.model.vis.map.zfar * self.env.sim.model.stat.extent,
+                                        )
+                    )[::-1]
         obs["annotation.human.action.task_description"] = raw_obs["language"]
+        
+        if "ep_meta" in raw_obs:
+            ep_meta = raw_obs["ep_meta"]
+            if "obj_pos" in ep_meta:
+                obs["state.obj_pos"] = ep_meta["obj_pos"]
+            if "obj2_pos" in ep_meta:
+                obs["state.obj2_pos"] = ep_meta["obj2_pos"]
+        
         return obs
 
     def reset(self, seed=None, options=None):

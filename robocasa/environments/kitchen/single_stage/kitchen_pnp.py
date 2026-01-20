@@ -744,9 +744,15 @@ class PnPCounterToStove(PnP):
         super()._setup_kitchen_references()
         self.stove = self.register_fixture_ref("stove", dict(id=FixtureType.STOVE))
         self.counter = self.register_fixture_ref(
-            "counter", dict(id=FixtureType.COUNTER, ref=self.stove, size=[0.30, 0.40])
+            "counter", dict(id=FixtureType.COUNTER, ref=self.stove, size=[0.60, 0.40])
         )
         self.init_robot_base_pos = self.stove
+
+    def _reset_internal(self):
+        """
+        Resets simulation internal configurations.
+        """
+        super()._reset_internal()
 
     def get_ep_meta(self):
         """
@@ -759,6 +765,12 @@ class PnPCounterToStove(PnP):
         ep_meta[
             "lang"
         ] = f"pick the {obj_lang} from the plate and place it in the {cont_lang}"
+
+        if "obj" in self.obj_body_id:
+            ep_meta["obj_pos"] = self.sim.data.body_xpos[self.obj_body_id["obj"]].copy()
+        if "obj2" in self.obj_body_id:
+            ep_meta["obj2_pos"] = self.sim.data.body_xpos[self.obj_body_id["obj2"]].copy()
+
         return ep_meta
 
     def _get_obj_cfgs(self):
@@ -777,6 +789,9 @@ class PnPCounterToStove(PnP):
                     ensure_object_boundary_in_range=False,
                     size=(0.02, 0.02),
                     rotation=[(-3 * np.pi / 8, -np.pi / 4), (np.pi / 4, 3 * np.pi / 8)],
+                    sample_region_kwargs=dict(
+                        locs=["rear_center"]
+                    ),
                 ),
             )
         )
@@ -784,6 +799,25 @@ class PnPCounterToStove(PnP):
         cfgs.append(
             dict(
                 name="obj",
+                obj_groups=self.obj_groups,
+                exclude_obj_groups=self.exclude_obj_groups,
+                graspable=True,
+                cookable=True,
+                placement=dict(
+                    fixture=self.counter,
+                    sample_region_kwargs=dict(
+                        ref=self.stove,
+                    ),
+                    size=(0.30, 0.30),
+                    pos=("ref", -1.0),
+                    try_to_place_in="container",
+                ),
+            )
+        )
+        
+        cfgs.append(
+            dict(
+                name="obj2",
                 obj_groups=self.obj_groups,
                 exclude_obj_groups=self.exclude_obj_groups,
                 graspable=True,
@@ -832,7 +866,7 @@ class PnPStoveToCounter(PnP):
         super()._setup_kitchen_references()
         self.stove = self.register_fixture_ref("stove", dict(id=FixtureType.STOVE))
         self.counter = self.register_fixture_ref(
-            "counter", dict(id=FixtureType.COUNTER, ref=self.stove, size=[0.30, 0.40])
+            "counter", dict(id=FixtureType.COUNTER, ref=self.stove, size=[0.80, 0.40])
         )
         self.init_robot_base_pos = self.stove
 

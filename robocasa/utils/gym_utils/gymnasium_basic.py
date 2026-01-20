@@ -64,7 +64,8 @@ def create_env_robosuite(
         ignore_done=True,
         use_object_obs=True,
         use_camera_obs=enable_render,
-        camera_depths=False,
+        # camera_depths=False,
+        camera_depths=True,
         seed=seed,
         translucent_robot=False,
     )
@@ -248,7 +249,9 @@ class RoboCasaEnv(gym.Env):
                 )
 
         self.render_cache = raw_obs[self.render_obs_key]
-        raw_obs["language"] = self.env.get_ep_meta().get("lang", "")
+        ep_meta = self.env.get_ep_meta()
+        raw_obs["language"] = ep_meta.get("lang", "")
+        raw_obs["ep_meta"] = ep_meta
 
         return raw_obs
 

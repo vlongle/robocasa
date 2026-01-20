@@ -420,11 +420,19 @@ class PandaOmronKeyConverter(RobotKeyConverter):
             "video.res256_image_side_0",
             "video.res256_image_side_1",
             "video.res256_image_wrist_0",
+            "video.res256_image_front_0",
+            # "video.res512_depth_side_0",
+            # "video.res512_depth_side_1",
+            # "video.res512_depth_wrist_0",
         ]
         camera_names = [
             "robot0_agentview_left",
             "robot0_agentview_right",
             "robot0_eye_in_hand",
+            "robot0_frontview",
+            # "robot0_agentview_left_depth",
+            # "robot0_agentview_right_depth",
+            # "robot0_eye_in_hand_depth",
         ]
         camera_widths, camera_heights = 512, 512
         return mapped_names, camera_names, camera_widths, camera_heights
