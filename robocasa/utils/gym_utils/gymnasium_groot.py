@@ -59,13 +59,25 @@ class GrootRoboCasaEnv(RoboCasaEnv):
             "annotation.human.action.task_description"
         ] = spaces.Text(max_length=256, charset=ALLOWED_LANGUAGE_CHARSET)
         
-        # Add ground truth object positions if available
-        self.observation_space["state.obj_pos"] = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
-        )
-        self.observation_space["state.obj2_pos"] = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
-        )
+        # # Add ground truth object positions if available
+        # self.observation_space["state.obj_pos"] = spaces.Box(
+        #     low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
+        # )
+        # self.observation_space["state.obj2_pos"] = spaces.Box(
+        #     low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
+        # )
+        
+        raw_obs = self.env._get_observations(force_update=True)
+        if "door_state" in raw_obs:
+            self.observation_space["door_state"] = spaces.Box(
+                low=-np.inf, high=np.inf, shape=raw_obs["door_state"].shape, dtype=np.float32
+            )
+        
+        if "handle_pos" in raw_obs:
+            self.observation_space["handle_pos"] = spaces.Box(
+                low=-np.inf, high=np.inf, shape=raw_obs["handle_pos"].shape, dtype=np.float32
+            )
+        
         self.action_space = self.key_converter.deduce_action_space(self.env)
 
         self.verbose = False
@@ -147,6 +159,12 @@ class GrootRoboCasaEnv(RoboCasaEnv):
                 obs["state.obj_pos"] = ep_meta["obj_pos"]
             if "obj2_pos" in ep_meta:
                 obs["state.obj2_pos"] = ep_meta["obj2_pos"]
+        
+        if "door_state" in raw_obs:
+            obs["door_state"] = raw_obs["door_state"]
+        
+        if "handle_pos" in raw_obs:
+            obs["handle_pos"] = raw_obs["handle_pos"]
         
         return obs
 

@@ -18,7 +18,44 @@ class ManipulateDoor(Kitchen):
         self.door_id = door_id
         assert behavior in ["open", "close"]
         self.behavior = behavior
+        self._auto_door_opening = 0.0
         super().__init__(*args, **kwargs)
+
+    def _setup_observables(self):
+        observables = super()._setup_observables()
+
+        @sensor(modality="object")
+        def door_state(obs_cache):
+            return np.array(list(self.door_fxtr.get_door_state(env=self).values()))
+
+        @sensor(modality="object")
+        def handle_pos(obs_cache):
+            fxtr = self.door_fxtr
+            if hasattr(fxtr, "left_handle_name") and hasattr(fxtr, "right_handle_name"):
+                return np.array([
+                    self.sim.data.get_geom_xpos(fxtr.left_handle_name),
+                    self.sim.data.get_geom_xpos(fxtr.right_handle_name)
+                ]).flatten()
+            elif hasattr(fxtr, "handle_name"):
+                return np.array(self.sim.data.get_geom_xpos(fxtr.handle_name)).flatten()
+            else:
+                return np.zeros(0)
+
+        observables["door_state"] = Observable(
+            name="door_state",
+            sensor=door_state,
+            sampling_rate=self.control_freq,
+            active=True,
+        )
+
+        observables["handle_pos"] = Observable(
+            name="handle_pos",
+            sensor=handle_pos,
+            sampling_rate=self.control_freq,
+            active=True,
+        )
+
+        return observables
 
     def _setup_kitchen_references(self):
         """
@@ -57,12 +94,27 @@ class ManipulateDoor(Kitchen):
         Reset the environment internal state for the door tasks.
         This includes setting the door state based on the behavior.
         """
+        self._auto_door_opening = 0.0
         if self.behavior == "open":
             self.door_fxtr.set_door_state(min=0.0, max=0.0, env=self, rng=self.rng)
         elif self.behavior == "close":
             self.door_fxtr.set_door_state(min=0.90, max=1.0, env=self, rng=self.rng)
         # set the door state then place the objects otherwise objects initialized in opened drawer will fall down before the drawer is opened
         super()._reset_internal()
+
+    def step(self, action):
+        if self.behavior == "open" and self._auto_door_opening < 0.9:
+            self._auto_door_opening += 0.1/8 ## open-loop horizon is 8 actually
+            self.door_fxtr.set_door_state(
+                min=self._auto_door_opening,
+                max=self._auto_door_opening,
+                env=self,
+                rng=self.rng
+            )
+            print(f"Auto door opening: {self._auto_door_opening}")
+            print(f"Door state: {self.door_fxtr.get_door_state(env=self)}")
+        
+        return super().step(action)
 
     def _check_success(self):
         """
