@@ -102,19 +102,21 @@ class ManipulateDoor(Kitchen):
         # set the door state then place the objects otherwise objects initialized in opened drawer will fall down before the drawer is opened
         super()._reset_internal()
 
-    def step(self, action):
-        if self.behavior == "open" and self._auto_door_opening < 0.9:
-            self._auto_door_opening += 0.1/8 ## open-loop horizon is 8 actually
-            self.door_fxtr.set_door_state(
-                min=self._auto_door_opening,
-                max=self._auto_door_opening,
-                env=self,
-                rng=self.rng
-            )
-            print(f"Auto door opening: {self._auto_door_opening}")
-            print(f"Door state: {self.door_fxtr.get_door_state(env=self)}")
+    # def step(self, action):
+    #     ## NOTE: TMP: manually opening the door to save the trajectory
+    #     if self.behavior == "open" and self._auto_door_opening < 0.9:
+    #         # self._auto_door_opening += 0.1/8 ## open-loop horizon is 8 actually
+    #         self._auto_door_opening += 0.025/8 ## open-loop horizon is 8 actually
+    #         self.door_fxtr.set_door_state(
+    #             min=self._auto_door_opening,
+    #             max=self._auto_door_opening,
+    #             env=self,
+    #             rng=self.rng
+    #         )
+    #         print(f"Auto door opening: {self._auto_door_opening}")
+    #         print(f"Door state: {self.door_fxtr.get_door_state(env=self)}")
         
-        return super().step(action)
+    #     return super().step(action)
 
     def _check_success(self):
         """
