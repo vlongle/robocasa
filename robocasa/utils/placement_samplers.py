@@ -372,22 +372,22 @@ class UniformRandomSampler(ObjectPositionSampler):
                     to="wxyz",
                 )
 
-                if self.name == "obj_container_Sampler":
-                    pos = (3.25, -0.49, 0.97) # right
-                    # pos = (2.18, -0.49, 0.943) # left
-                    # pos = (2.18, -0.25, 0.943) # left
-                    placed_objects[obj.name] = (pos, quat, obj)
-                    success = True
-                    break
-                if self.name == "obj2_container_Sampler":
-                    # pos = (3.32, -0.49, 0.943) # right
-                    # pos = (2.18, -0.49, 0.943) # left
-                    # pos = (2.18, -0.15, 0.943) # left
-                    pos = (2.18, -0.49, 0.943) # left
-                    # pos = (3.32, -0.15, 0.943) # right
-                    placed_objects[obj.name] = (pos, quat, obj)
-                    success = True
-                    break
+                # if self.name == "obj_container_Sampler":
+                #     pos = (3.25, -0.49, 0.97) # right
+                #     # pos = (2.18, -0.49, 0.943) # left
+                #     # pos = (2.18, -0.25, 0.943) # left
+                #     placed_objects[obj.name] = (pos, quat, obj)
+                #     success = True
+                #     break
+                # if self.name == "obj2_container_Sampler":
+                #     # pos = (3.32, -0.49, 0.943) # right
+                #     # pos = (2.18, -0.49, 0.943) # left
+                #     # pos = (2.18, -0.15, 0.943) # left
+                #     pos = (2.18, -0.49, 0.943) # left
+                #     # pos = (3.32, -0.15, 0.943) # right
+                #     placed_objects[obj.name] = (pos, quat, obj)
+                #     success = True
+                #     break
 
                 location_valid = True
 

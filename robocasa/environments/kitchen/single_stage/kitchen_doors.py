@@ -106,7 +106,7 @@ class ManipulateDoor(Kitchen):
     #     ## NOTE: TMP: manually opening the door to save the trajectory
     #     if self.behavior == "open" and self._auto_door_opening < 0.9:
     #         # self._auto_door_opening += 0.1/8 ## open-loop horizon is 8 actually
-    #         self._auto_door_opening += 0.025/8 ## open-loop horizon is 8 actually
+    #         self._auto_door_opening += 0.0125/8 ## open-loop horizon is 8 actually
     #         self.door_fxtr.set_door_state(
     #             min=self._auto_door_opening,
     #             max=self._auto_door_opening,
