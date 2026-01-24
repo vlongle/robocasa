@@ -269,23 +269,23 @@ OBJ_CATEGORIES = dict(
         ),
         objaverse=dict(scale=[0.70, 0.70, 1.0], exclude=["bread_22"]),  # hole on bottom
     ),
-    broccoli=dict(
-        types=("vegetable"),
-        graspable=True,
-        washable=True,
-        microwavable=True,
-        cookable=True,
-        freezable=True,
-        aigen=dict(
-            scale=1.35,
-        ),
-        objaverse=dict(
-            scale=1.25,
-            exclude=[
-                "broccoli_2",  # holes on one part
-            ],
-        ),
-    ),
+    # broccoli=dict(
+    #     types=("vegetable"),
+    #     graspable=True,
+    #     washable=True,
+    #     microwavable=True,
+    #     cookable=True,
+    #     freezable=True,
+    #     aigen=dict(
+    #         scale=1.35,
+    #     ),
+    #     objaverse=dict(
+    #         scale=1.25,
+    #         exclude=[
+    #             "broccoli_2",  # holes on one part
+    #         ],
+    #     ),
+    # ),
     cake=dict(
         types=("sweets"),
         graspable=True,
@@ -1112,25 +1112,25 @@ OBJ_CATEGORIES = dict(
             ],
         ),
     ),
-    steak=dict(
-        types=("meat"),
-        graspable=True,
-        washable=True,
-        microwavable=True,
-        cookable=True,
-        freezable=True,
-        aigen=dict(
-            scale=[1.0, 1.0, 2.0],
-        ),
-        objaverse=dict(
-            scale=[1.0, 1.0, 2.0],
-            exclude=[
-                "steak_13",  # bottom texture completely messed up
-                "steak_1",  # bottom texture completely messed up
-                # "steak_9", # bottom with some minor issues, keeping anyway
-            ],
-        ),
-    ),
+    # steak=dict(
+    #     types=("meat"),
+    #     graspable=True,
+    #     washable=True,
+    #     microwavable=True,
+    #     cookable=True,
+    #     freezable=True,
+    #     aigen=dict(
+    #         scale=[1.0, 1.0, 2.0],
+    #     ),
+    #     objaverse=dict(
+    #         scale=[1.0, 1.0, 2.0],
+    #         exclude=[
+    #             "steak_13",  # bottom texture completely messed up
+    #             "steak_1",  # bottom texture completely messed up
+    #             # "steak_9", # bottom with some minor issues, keeping anyway
+    #         ],
+    #     ),
+    # ),
     sweet_potato=dict(
         types=("vegetable"),
         graspable=True,
