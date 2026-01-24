@@ -365,10 +365,12 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         else:
             layout_id, style_id = self.rng.choice(self.layout_and_style_ids)
             ## NOTE: IMPORTANT: vlongle/ hardcode the layout and style id to 4 for now
-            # self.layout_id = 4 # int(layout_id)
-            # self.style_id = 4 # int(style_id)
-            self.layout_id = 1
-            self.style_id = 1
+            self.layout_id = int(layout_id)
+            self.style_id = int(style_id)
+            # faucet: (2, 2), (7, 10)
+            # pnp: (1, 1)
+            # self.layout_id = 7
+            # self.style_id = 10
 
         if macros.VERBOSE:
             print("layout: {}, style: {}".format(self.layout_id, self.style_id))
@@ -487,8 +489,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             break
             
         if object_placements is None:
-            if self._load_attempts > 10:
-                raise RuntimeError("Failed to place objects after 10 full environment reload attempts. Check your fixture sizes and offsets.")
+            # if self._load_attempts > 10:
+            #     raise RuntimeError("Failed to place objects after 10 full environment reload attempts. Check your fixture sizes and offsets.")
             
             if macros.VERBOSE or True:
                 print(f"[DEBUG] Could not place objects on attempt {self._load_attempts}. Retrying _load_model()...")
@@ -730,7 +732,6 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             if placement is None:
                 continue
             
-            print(f"[DEBUG] Initializing sampler for: {cfg['name']} (Type: {cfg['type']})")
             
             fixture_id = placement.get("fixture", None)
             if fixture_id is not None:
@@ -739,7 +740,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     id=fixture_id,
                     ref=placement.get("ref", None),
                 )
-                print(f"[DEBUG]   Target fixture: {fixture.name} at {fixture.pos}")
+                
 
                 # calculate the total available space where object could be placed
                 sample_region_kwargs = placement.get("sample_region_kwargs", {})
@@ -750,7 +751,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 margin = placement.get("margin", 0.04)
                 outer_size = (outer_size[0] - margin, outer_size[1] - margin)
                 
-                print(f"[DEBUG]   Outer Region Size: {outer_size}, Offset: {reset_region['offset']}")
+                
 
                 # calculate the size of the inner region where object will actually be placed
                 target_size = placement.get("size", None)
@@ -770,7 +771,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 inner_xpos, inner_ypos = placement.get("pos", (None, None))
                 offset = placement.get("offset", (0.0, 0.0))
                 
-                print(f"[DEBUG]   Inner Size: {inner_size}, Request Pos: {inner_xpos}, Request Offset: {offset}")
+                
 
                 # center inner region within outer region
                 if inner_xpos == "ref":
@@ -787,7 +788,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                         outer_to_ref = fixture_to_ref - reset_region["offset"]
                         inner_xpos = outer_to_ref[0] / x_halfsize
                         inner_xpos = np.clip(inner_xpos, a_min=-1.0, a_max=1.0)
-                        print(f"[DEBUG]   Computed inner_xpos relative to ref {ref_fixture.name}: {inner_xpos}")
+                        
                 elif inner_xpos is None:
                     inner_xpos = 0.0
 
@@ -815,7 +816,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     + intra_offset[1]
                 )
                 
-                print(f"[DEBUG]   Final X Range: {x_range}, Y Range: {y_range}")
+                
                 rotation = placement.get("rotation", np.array([-np.pi / 4, np.pi / 4]))
             else:
                 target_size = placement.get("size", None)
@@ -824,7 +825,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 rotation = placement.get("rotation", np.array([-np.pi / 4, np.pi / 4]))
                 ref_pos = [0, 0, 0]
                 ref_rot = 0.0
-                print(f"[DEBUG]   Placing relative to WORLD origin. X Range: {x_range}, Y Range: {y_range}")
+                
 
             if macros.SHOW_SITES is True:
                 """

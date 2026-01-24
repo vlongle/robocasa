@@ -59,13 +59,13 @@ class GrootRoboCasaEnv(RoboCasaEnv):
             "annotation.human.action.task_description"
         ] = spaces.Text(max_length=256, charset=ALLOWED_LANGUAGE_CHARSET)
         
-        # Add ground truth object positions if available
-        self.observation_space["state.obj_pos"] = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
-        )
-        self.observation_space["state.obj2_pos"] = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
-        )
+        # # Add ground truth object positions if available
+        # self.observation_space["state.obj_pos"] = spaces.Box(
+        #     low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
+        # )
+        # self.observation_space["state.obj2_pos"] = spaces.Box(
+        #     low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32
+        # )
         self.action_space = self.key_converter.deduce_action_space(self.env)
 
         self.verbose = False
