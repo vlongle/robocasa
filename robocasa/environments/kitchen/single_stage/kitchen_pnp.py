@@ -735,6 +735,7 @@ class PnPCounterToStove(PnP):
 
     def __init__(self, obj_groups="food", *args, **kwargs):
         super().__init__(obj_groups=obj_groups, *args, **kwargs)
+        self.collided = False
         self.init_obj = None
 
     def _setup_kitchen_references(self):
@@ -849,6 +850,13 @@ class PnPCounterToStove(PnP):
             self.init_obj = OU.check_obj_in_receptacle(self, "obj", "obj_container", th=0.1)#  and OU.check_obj_in_receptacle(self, "obj2", "obj2_container", th=0.1)
         obj_in_container = OU.check_obj_in_receptacle(self, "obj", "container", th=0.07)
         gripper_obj_far = OU.gripper_obj_far(self)
+
+        if not obj_in_container:
+            fixtures = ['cab_1_left_group', 'cab_2_left_group', 'microwave_main_group', 'cab_micro_main_group', 'cab_1_main_group', 'cab_2_main_group', 'cab_3_main_group', 'cab_main_main_group']
+            # fixtures = ['cab_main_main_group', 'hood_main_group', 'cab_2_main_group', 'shelves_main_group', 'top_main_group', 'counter_main_main_group']
+            for fix_name in fixtures:
+                fix = self.get_fixture(fix_name)
+                self.collided = self.collided or self.check_contact(self.robots[0].robot_model, fix) or self.check_contact(self.robots[0].gripper['right'], fix)
 
         return obj_in_container and gripper_obj_far
 

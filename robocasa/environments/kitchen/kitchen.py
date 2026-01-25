@@ -366,10 +366,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         else:
             layout_id, style_id = self.rng.choice(self.layout_and_style_ids)
             ## NOTE: IMPORTANT: vlongle/ hardcode the layout and style id to 4 for now
-            # self.layout_id = 4 # int(layout_id)
-            # self.style_id = 4 # int(style_id)
-            self.layout_id = 1
-            self.style_id = 1
+            self.layout_id = int(layout_id)
+            self.style_id = int(style_id)
 
         if macros.VERBOSE:
             print("layout: {}, style: {}".format(self.layout_id, self.style_id))
