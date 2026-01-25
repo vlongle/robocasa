@@ -75,8 +75,8 @@ def create_env_robosuite(
             {
                 "layout_ids": None,
                 "style_ids": None,
-                "layout_and_style_ids": [[1, 1]], # [2, 2], [4, 4], [6, 9], [7, 10]],  [1, 1] for pure semantic
-                # "layout_and_style_ids": [[4, 4]], # [4, 4] for collision
+                # "layout_and_style_ids": [[1, 1]], # [2, 2], [4, 4], [6, 9], [7, 10]],  [1, 1] for pure semantic
+                "layout_and_style_ids": [[4, 4]], # [4, 4] for collision
                 "obj_instance_split": "B",
                 "generative_textures": None,
                 "randomize_cameras": False,

@@ -374,9 +374,11 @@ class UniformRandomSampler(ObjectPositionSampler):
 
                 if self.name == "obj_container_Sampler": # target
                     if self.binary_LR:
-                        pos = (3.3, -0.49, 0.97) # right
+                        # pos = (3.3, -0.49, 0.97) # right
+                        pos = (2.721, -2.933, 0.942) # right
                     else:
-                        pos = (2.18, -0.49, 0.943) # left
+                        # pos = (2.18, -0.49, 0.943) # left
+                        pos = (2.719, -1.842, 0.945) # left
                     # pos = (2.18, -0.49, 0.943) # left
                     # pos = (2.18, -0.25, 0.943) # left
                     placed_objects[obj.name] = (pos, quat, obj)
@@ -384,9 +386,11 @@ class UniformRandomSampler(ObjectPositionSampler):
                     break
                 if self.name == "obj2_container_Sampler": #
                     if self.binary_LR:
-                        pos = (3.3, -0.49, 0.97) # righ
+                        # pos = (30.3, -0.49, 0.97) # right
+                        pos = (2.721, -2.933, 0.942) # right
                     else:   
-                        pos = (2.18, -0.49, 0.943) # left
+                        # pos = (20.18, -0.49, 0.943) # left
+                        pos = (2.719, -1.842, 0.945) # left
                         
                     
                     # pos = (3.32, -0.15, 0.943) # right
