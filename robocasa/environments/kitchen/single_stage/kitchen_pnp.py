@@ -735,6 +735,7 @@ class PnPCounterToStove(PnP):
 
     def __init__(self, obj_groups="food", *args, **kwargs):
         super().__init__(obj_groups=obj_groups, *args, **kwargs)
+        self.init_obj = None
 
     def _setup_kitchen_references(self):
         """
@@ -844,6 +845,8 @@ class PnPCounterToStove(PnP):
         Returns:
             bool: True if the task is successful, False otherwise
         """
+        if self.init_obj is None: # only check the target object was in the receptacle at initialization
+            self.init_obj = OU.check_obj_in_receptacle(self, "obj", "obj_container", th=0.1)#  and OU.check_obj_in_receptacle(self, "obj2", "obj2_container", th=0.1)
         obj_in_container = OU.check_obj_in_receptacle(self, "obj", "container", th=0.07)
         gripper_obj_far = OU.gripper_obj_far(self)
 

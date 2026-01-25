@@ -378,20 +378,20 @@ OBJ_CATEGORIES = dict(
             # ]
         ),
     ),
-    cheese=dict(
-        types=("dairy"),
-        graspable=True,
-        washable=True,
-        microwavable=True,
-        cookable=True,
-        freezable=True,
-        aigen=dict(
-            scale=1.0,
-        ),
-        objaverse=dict(
-            scale=0.85,
-        ),
-    ),
+    # cheese=dict(
+    #     types=("dairy"),
+    #     graspable=True,
+    #     washable=True,
+    #     microwavable=True,
+    #     cookable=True,
+    #     freezable=True,
+    #     aigen=dict(
+    #         scale=1.0,
+    #     ),
+    #     objaverse=dict(
+    #         scale=0.85,
+    #     ),
+    # ),
     chips=dict(
         types=("packaged_food"),
         graspable=False,

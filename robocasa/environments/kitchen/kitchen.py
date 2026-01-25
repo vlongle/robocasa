@@ -305,6 +305,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     "body_part_ordering"
                 ] = ["right", "right_gripper", "base", "torso"]
 
+        self.binary_LR = np.random.choice([0, 1])  # 0 for left, 1 for right
         super().__init__(
             robots=robots,
             env_configuration=env_configuration,
@@ -487,8 +488,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             break
             
         if object_placements is None:
-            if self._load_attempts > 10:
-                raise RuntimeError("Failed to place objects after 10 full environment reload attempts. Check your fixture sizes and offsets.")
+            # if self._load_attempts > 10:
+            #     raise RuntimeError("Failed to place objects after 10 full environment reload attempts. Check your fixture sizes and offsets.")
             
             if macros.VERBOSE or True:
                 print(f"[DEBUG] Could not place objects on attempt {self._load_attempts}. Retrying _load_model()...")
@@ -730,7 +731,6 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             if placement is None:
                 continue
             
-            print(f"[DEBUG] Initializing sampler for: {cfg['name']} (Type: {cfg['type']})")
             
             fixture_id = placement.get("fixture", None)
             if fixture_id is not None:
@@ -739,7 +739,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     id=fixture_id,
                     ref=placement.get("ref", None),
                 )
-                print(f"[DEBUG]   Target fixture: {fixture.name} at {fixture.pos}")
+                
 
                 # calculate the total available space where object could be placed
                 sample_region_kwargs = placement.get("sample_region_kwargs", {})
@@ -750,7 +750,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 margin = placement.get("margin", 0.04)
                 outer_size = (outer_size[0] - margin, outer_size[1] - margin)
                 
-                print(f"[DEBUG]   Outer Region Size: {outer_size}, Offset: {reset_region['offset']}")
+                
 
                 # calculate the size of the inner region where object will actually be placed
                 target_size = placement.get("size", None)
@@ -770,7 +770,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 inner_xpos, inner_ypos = placement.get("pos", (None, None))
                 offset = placement.get("offset", (0.0, 0.0))
                 
-                print(f"[DEBUG]   Inner Size: {inner_size}, Request Pos: {inner_xpos}, Request Offset: {offset}")
+                
 
                 # center inner region within outer region
                 if inner_xpos == "ref":
@@ -787,7 +787,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                         outer_to_ref = fixture_to_ref - reset_region["offset"]
                         inner_xpos = outer_to_ref[0] / x_halfsize
                         inner_xpos = np.clip(inner_xpos, a_min=-1.0, a_max=1.0)
-                        print(f"[DEBUG]   Computed inner_xpos relative to ref {ref_fixture.name}: {inner_xpos}")
+                        
                 elif inner_xpos is None:
                     inner_xpos = 0.0
 
@@ -815,7 +815,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                     + intra_offset[1]
                 )
                 
-                print(f"[DEBUG]   Final X Range: {x_range}, Y Range: {y_range}")
+                
                 rotation = placement.get("rotation", np.array([-np.pi / 4, np.pi / 4]))
             else:
                 target_size = placement.get("size", None)
@@ -824,7 +824,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 rotation = placement.get("rotation", np.array([-np.pi / 4, np.pi / 4]))
                 ref_pos = [0, 0, 0]
                 ref_rot = 0.0
-                print(f"[DEBUG]   Placing relative to WORLD origin. X Range: {x_range}, Y Range: {y_range}")
+                
 
             if macros.SHOW_SITES is True:
                 """
@@ -902,6 +902,10 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
                 ),
                 sample_args=placement.get("sample_args", None),
             )
+            if cfg['name'] == 'obj_container':
+                placement_initializer.samplers[list(placement_initializer.samplers.keys())[-1]].binary_LR = self.binary_LR
+            if cfg['name'] == 'obj2_container':
+                placement_initializer.samplers[list(placement_initializer.samplers.keys())[-1]].binary_LR = 1 - self.binary_LR
 
         return placement_initializer
 
@@ -910,6 +914,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         Resets simulation internal configurations.
         """
         super()._reset_internal()
+        self.binary_LR = np.random.choice([0, 1])  # 0 for left, 1 for right
 
         # Reset all object positions using initializer sampler if we're not directly loading from an xml
         if not self.deterministic_reset and self.placement_initializer is not None:
