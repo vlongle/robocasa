@@ -853,7 +853,7 @@ class PnPCounterToStove(PnP):
         gripper_obj_far = OU.gripper_obj_far(self)
 
         if not obj_in_container:
-            fixtures = ['microwave_main_group', 'cab_micro_main_group', 'cab_1_main_group', 'cab_2_main_group', 'cab_3_main_group', 'cab_main_main_group']
+            fixtures = ['cab_1_left_group', 'cab_2_left_group', 'microwave_main_group', 'cab_micro_main_group', 'cab_1_main_group', 'cab_2_main_group', 'cab_3_main_group', 'cab_main_main_group']
             for fix_name in fixtures:
                 fix = self.get_fixture(fix_name)
                 self.collided = self.collided or self.check_contact(self.robots[0].robot_model, fix) or self.check_contact(self.robots[0].gripper['right'], fix)
