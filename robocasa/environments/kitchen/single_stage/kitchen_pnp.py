@@ -852,12 +852,21 @@ class PnPCounterToStove(PnP):
         gripper_obj_far = OU.gripper_obj_far(self)
 
         if not obj_in_container:
-            fixtures = ['cab_1_left_group', 'cab_2_left_group', 'microwave_main_group', 'cab_micro_main_group', 'cab_1_main_group', 'cab_2_main_group', 'cab_3_main_group', 'cab_main_main_group']
-            # fixtures = ['cab_main_main_group', 'hood_main_group', 'cab_2_main_group', 'shelves_main_group', 'top_main_group', 'counter_main_main_group']
+            # fixtures = ['cab_1_left_group', 'cab_2_left_group', 'microwave_main_group', 'cab_micro_main_group', 'cab_1_main_group', 'cab_2_main_group', 'cab_3_main_group', 'cab_main_main_group']
+            fixtures = ['cab_main_main_group', 'hood_main_group', 'cab_2_main_group', 'shelves_main_group', 'top_main_group', 'counter_main_main_group']
             for fix_name in fixtures:
-                fix = self.get_fixture(fix_name)
-                self.collided = self.collided or self.check_contact(self.robots[0].robot_model, fix) or self.check_contact(self.robots[0].gripper['right'], fix)
-
+                if fix_name in self.fixtures:
+                    # fix = self.get_fixture(fix_name)
+                    
+                    # fix.contact_geoms for cabinets does not include the door geoms!
+                    # so we check for all geoms that start with the fixture name
+                    fix_geoms = [name for name in self.sim.model.geom_names if name.startswith(fix_name)]
+                    
+                    collide1 = self.check_contact(self.robots[0].robot_model, fix_geoms) or self.check_contact(self.robots[0].gripper['right'], fix_geoms)
+                    collide2 = self.check_contact(fix_geoms, self.robots[0].robot_model) or self.check_contact(fix_geoms, self.robots[0].gripper['right'])
+                    collide = collide1 or collide2
+                    self.collided = self.collided or collide
+                    
         return obj_in_container and gripper_obj_far
 
 
