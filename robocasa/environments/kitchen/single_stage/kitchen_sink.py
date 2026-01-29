@@ -128,6 +128,8 @@ class TurnSinkSpout(Kitchen):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.collided = False
+        self.init_obj = True
 
     def _setup_kitchen_references(self):
         """
@@ -214,5 +216,20 @@ class TurnSinkSpout(Kitchen):
         """
         handle_state = self.sink.get_handle_state(env=self)
         success = handle_state["spout_ori"] == self.behavior
+        self.init_obj = True
+        if not success:
+            fixtures = ['cab_1_main_group', 'cab_2_main_group', 'cab_main_main_group', 'cab_corner_3_main_group', 'cab_corner_4_main_group', 'cab_1_left_group', 'cab_2_left_group', 'cab_3_left_group', 'cab_1_right_group']
+            for fix_name in fixtures:
+                if fix_name in self.fixtures:
+                    # fix = self.get_fixture(fix_name)
+                    
+                    # fix.contact_geoms for cabinets does not include the door geoms!
+                    # so we check for all geoms that start with the fixture name
+                    fix_geoms = [name for name in self.sim.model.geom_names if name.startswith(fix_name)]
+                    
+                    collide1 = self.check_contact(self.robots[0].robot_model, fix_geoms) or self.check_contact(self.robots[0].gripper['right'], fix_geoms)
+                    collide2 = self.check_contact(fix_geoms, self.robots[0].robot_model) or self.check_contact(fix_geoms, self.robots[0].gripper['right'])
+                    collide = collide1 or collide2
+                    self.collided = self.collided or collide
 
         return success
