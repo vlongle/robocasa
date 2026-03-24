@@ -364,13 +364,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             self.style_id = self._ep_meta["style_id"]
         else:
             layout_id, style_id = self.rng.choice(self.layout_and_style_ids)
-            ## NOTE: IMPORTANT: vlongle/ hardcode the layout and style id to 4 for now
             self.layout_id = int(layout_id)
             self.style_id = int(style_id)
-            # faucet: (2, 2), (7, 10)
-            # pnp: (1, 1)
-            # self.layout_id = 7
-            # self.style_id = 10
 
         if macros.VERBOSE:
             print("layout: {}, style: {}".format(self.layout_id, self.style_id))

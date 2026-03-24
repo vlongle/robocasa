@@ -75,9 +75,10 @@ def create_env_robosuite(
             {
                 "layout_ids": None,
                 "style_ids": None,
-                # "layout_and_style_ids": [[1, 1], [2, 2], [4, 4], [6, 9], [7, 10]],
-                # "layout_and_style_ids": [[2, 2], [7, 10]],
-                "layout_and_style_ids": [[4, 4]],
+                # collision scenes for faucet: (2,2) and (7,10)
+                # pnp: (1,1)
+                # all scenes: [[1, 1], [2, 2], [4, 4], [6, 9], [7, 10]]
+                "layout_and_style_ids": [[2, 2], [7, 10]],
                 "obj_instance_split": "B",
                 "generative_textures": None,
                 "randomize_cameras": False,
