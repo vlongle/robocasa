@@ -243,7 +243,7 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         translucent_robot=False,
         randomize_cameras=False,
     ):
-        print("[DEBUG] use_distractors: ", use_distractors)
+        # print("[DEBUG] use_distractors: ", use_distractors)
         self.init_robot_base_pos = init_robot_base_pos
 
         # object placement initializer
@@ -340,8 +340,8 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
         if not hasattr(self, "_load_attempts"):
             self._load_attempts = 0
         self._load_attempts += 1
-        if self._load_attempts > 1:
-            print(f"[DEBUG] _load_model attempt {self._load_attempts}...")
+        # if self._load_attempts > 1:
+            # print(f"[DEBUG] _load_model attempt {self._load_attempts}...")
 
         super()._load_model()
 
@@ -487,13 +487,13 @@ class Kitchen(ManipulationEnv, metaclass=KitchenEnvMeta):
             # if self._load_attempts > 10:
             #     raise RuntimeError("Failed to place objects after 10 full environment reload attempts. Check your fixture sizes and offsets.")
             
-            if macros.VERBOSE or True:
-                print(f"[DEBUG] Could not place objects on attempt {self._load_attempts}. Retrying _load_model()...")
+            # if macros.VERBOSE or True:
+            #     print(f"[DEBUG] Could not place objects on attempt {self._load_attempts}. Retrying _load_model()...")
             self._load_model()
             return
         
-        if self._load_attempts > 1:
-            print(f"[DEBUG] Objects successfully placed on attempt {self._load_attempts}")
+        # if self._load_attempts > 1:
+            # print(f"[DEBUG] Objects successfully placed on attempt {self._load_attempts}")
         self.object_placements = object_placements
 
     def _create_objects(self):
