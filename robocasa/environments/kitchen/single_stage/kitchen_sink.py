@@ -156,6 +156,19 @@ class TurnSinkSpout(Kitchen):
             behavior=self.behavior,
             init_sink_mode=self.init_sink_mode,
         )
+        # Expose the spout-top geom's live world-frame position as obj_pos. This
+        # is the semantic-guidance target for the gr00t action head — the geom
+        # named "{prefix}spout_top" is the horizontal pipe at the end of the
+        # faucet neck, which sits at EE height and swings with spout_joint.
+        # GrootRoboCasaEnv reads ep_meta["obj_pos"] into state.obj_pos, which
+        # Gr00tN1d6ActionHead._compute_target_point_base_frame then rotates into
+        # base frame for the −||pos − target||² attractor.
+        try:
+            geom_name = f"{self.sink.naming_prefix}spout_top"
+            gid = self.sim.model.geom_name2id(geom_name)
+            ep_meta["obj_pos"] = np.array(self.sim.data.geom_xpos[gid]).copy()
+        except Exception:
+            pass
         return ep_meta
 
     def _reset_internal(self):
