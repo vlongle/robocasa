@@ -44,15 +44,24 @@ class GrootRoboCasaEnv(RoboCasaEnv):
                     low=0, high=255, shape=(*FINAL_IMAGE_RESOLUTION, 3), dtype=np.uint8
                 )
             if mapped_name in ["video.res256_image_side_0", "video.res256_image_side_1", "video.res256_image_wrist_0", "video.res256_image_front_0"]:
-                self.observation_space[
-                    mapped_name.replace("256", "512")
-                ] = spaces.Box(
-                    low=0, high=255, shape=(512, 512, 3), dtype=np.uint8
+                # VLA input key: res256, matches the processor's modality key.
+                # The image may be at any render resolution; the processor resizes
+                # to 256 internally via SmallestMaxSize.
+                render_res = int(self.camera_widths[0]) if isinstance(self.camera_widths, (list, tuple)) else int(self.camera_widths)
+                assert render_res in (256, 512), f"render_res must be 256 or 512, got {render_res}"
+                self.observation_space[mapped_name] = spaces.Box(
+                    low=0, high=255, shape=(render_res, render_res, 3), dtype=np.uint8
                 )
-                self.observation_space[
-                    mapped_name.replace("256", "512").replace("image", "depth")
-                ] = spaces.Box(
-                    low=0, high=1e10, shape=(512, 512, 1), dtype=np.float32
+                # Guidance reads video.res{render}_{image,depth}_* — keys
+                # explicitly tied to the render resolution so intrinsics/extrinsics
+                # calibrated for that resolution match the depth unprojection.
+                guide_image_key = mapped_name.replace("res256", f"res{render_res}")
+                guide_depth_key = guide_image_key.replace("image", "depth")
+                self.observation_space[guide_image_key] = spaces.Box(
+                    low=0, high=255, shape=(render_res, render_res, 3), dtype=np.uint8
+                )
+                self.observation_space[guide_depth_key] = spaces.Box(
+                    low=0, high=1e10, shape=(render_res, render_res, 1), dtype=np.float32
                 )
             
         self.observation_space[
@@ -129,11 +138,19 @@ class GrootRoboCasaEnv(RoboCasaEnv):
                     raw_obs[camera_name + "_image"]
                 )
             if mapped_name in ["video.res256_image_side_0", "video.res256_image_side_1", "video.res256_image_wrist_0", "video.res256_image_front_0"]:
-                obs[
-                    mapped_name.replace("256", "512")
-                ] = np.copy(raw_obs[camera_name + "_image"])
+                # mapped_name (res256) is the VLA input; guide_image_key
+                # (res{render}) is the guidance input. Both point to the same
+                # raw render tensor — the processor downsamples to 256 if
+                # render=512; guidance uses the raw tensor with matching
+                # calib_{render}/ intrinsics.
+                render_res = int(self.camera_widths[0]) if isinstance(self.camera_widths, (list, tuple)) else int(self.camera_widths)
+                guide_image_key = mapped_name.replace("res256", f"res{render_res}")
+                guide_depth_key = guide_image_key.replace("image", "depth")
+                raw_img = np.copy(raw_obs[camera_name + "_image"])
+                obs[mapped_name] = raw_img
+                obs[guide_image_key] = raw_img
                 if (camera_name + "_depth") in raw_obs:
-                    obs[mapped_name.replace("256", "512").replace("image", "depth")] = np.copy(
+                    obs[guide_depth_key] = np.copy(
                         linearize_depth(raw_obs[camera_name + "_depth"],
                                         self.env.sim.model.vis.map.znear * self.env.sim.model.stat.extent,
                                         self.env.sim.model.vis.map.zfar * self.env.sim.model.stat.extent,
