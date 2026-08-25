@@ -1,4 +1,3 @@
-import inspect
 import os
 import random
 from copy import deepcopy
@@ -8,11 +7,9 @@ import numpy as np
 from lxml import etree as ET
 from robosuite.utils.mjcf_utils import find_elements
 
-import robocasa
+import robocasa.models
 
-TEXTURES_DIR = (
-    Path(inspect.getfile(robocasa)).parent / "models" / "assets" / "generative_textures"
-)
+TEXTURES_DIR = Path(robocasa.models.assets_root) / "generative_textures"
 
 CABINET_TEX_NAMES = [
     "flat copy 26.png",
